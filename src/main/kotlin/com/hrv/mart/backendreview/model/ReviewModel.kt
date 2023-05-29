@@ -4,8 +4,8 @@ import org.bson.types.ObjectId
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 
-@Document("Product")
-data class Product(
+@Document("Review")
+data class Review(
     val userId: String,
     val productId: String,
     val title: String,
@@ -18,7 +18,7 @@ data class Product(
             this(userId, productId, name, description, images) {
         this.id = id
     }
-    fun setIdToDefault(): Product {
+    fun setIdToDefault(): Review {
         this.id = ObjectId().toString()
         return this
     }
