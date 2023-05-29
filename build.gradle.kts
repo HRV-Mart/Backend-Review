@@ -6,6 +6,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.0"
     kotlin("jvm") version "1.8.21"
     kotlin("plugin.spring") version "1.8.21"
+    id("jacoco")// This is to use Jacoco for coverage testing
     id("io.gitlab.arturbosch.detekt") version("1.23.0")
 }
 detekt {
@@ -52,4 +53,18 @@ tasks.withType<Detekt>().configureEach {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    // To run Jacoco Test Coverage Verification
+    finalizedBy("jacocoTestCoverageVerification")
+}
+tasks.jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            excludes = listOf(
+                "${group}.backendreview.repository.ReviewRepository.kt.*"
+            )
+            limit {
+                minimum = "0.9".toBigDecimal()
+            }
+        }
+    }
 }
