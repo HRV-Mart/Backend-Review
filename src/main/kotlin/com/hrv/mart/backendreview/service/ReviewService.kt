@@ -3,6 +3,8 @@ package com.hrv.mart.backendreview.service
 import com.hrv.mart.backendreview.model.Review
 import com.hrv.mart.backendreview.repository.ReviewRepository
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
+import org.springframework.http.server.reactive.ServerHttpResponse
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 
@@ -11,21 +13,45 @@ class ReviewService(
     @Autowired
     private val reviewRepository: ReviewRepository
 ) {
-    fun createReview(review: Review) =
-        reviewRepository.insert(review.setIdToDefault())
-    fun updateReview(review: Review) =
-        reviewRepository.existsById(review.id)
-            .flatMap {
-                if (it) {
-                    reviewRepository.save(review)
-                        .then(Mono.just("Review Updated successfully"))
-                } else {
-                    Mono.just("Review Not Found")
+    fun createReview(
+        review: Review,
+        response: ServerHttpResponse
+    ) =
+        reviewRepository
+            .existsByUserIdAndProductId(review.userId, review.productId)
+            .flatMap {isExist ->
+                if (isExist) {
+                    response.statusCode = HttpStatus.INTERNAL_SERVER_ERROR
+                    Mono.just("Review already exist")
+                }
+                else {
+                    response.statusCode = HttpStatus.OK
+                    reviewRepository
+                        .insert(review)
+                        .then(Mono.just("Review created successfully"))
                 }
             }
-    fun deleteReview(reviewId: String) =
-        reviewRepository.deleteById(reviewId)
-            .then(Mono.just("Review Deleted"))
+    fun deleteReview(
+        userId: String,
+        productId: String,
+        response: ServerHttpResponse
+    ) =
+        reviewRepository.existsByUserIdAndProductId(
+            userId,
+            productId
+        )
+            .flatMap {exist ->
+                if (exist) {
+                    response.statusCode = HttpStatus.OK
+                    reviewRepository.deleteByUserIdAndProductId(userId, productId)
+                        .then(Mono.just("Review deleted successfully"))
+                }
+                else {
+                    response.statusCode = HttpStatus.NOT_FOUND
+                    Mono.just("Review not found")
+                }
+            }
+
     fun getProductReviews(productId: String) =
         reviewRepository.findByProductId(productId)
     fun getUserReview(userId: String) =

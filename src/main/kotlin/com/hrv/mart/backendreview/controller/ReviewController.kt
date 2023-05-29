@@ -3,11 +3,11 @@ package com.hrv.mart.backendreview.controller
 import com.hrv.mart.backendreview.model.Review
 import com.hrv.mart.backendreview.service.ReviewService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.server.reactive.ServerHttpResponse
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -21,16 +21,27 @@ class ReviewController(
     private val reviewService: ReviewService
 ) {
     @PostMapping
-    fun createReview(@RequestBody review: Review) =
-        reviewService.createReview(review)
+    fun createReview(
+        @RequestBody review: Review,
+        response: ServerHttpResponse
+    ) =
+        reviewService.createReview(
+            review,
+            response
+        )
 
-    @PutMapping
-    fun updateReview(@RequestBody review: Review) =
-        reviewService.updateReview(review)
 
-    @DeleteMapping("/{reviewId}")
-    fun deleteReview(@PathVariable reviewId: String) =
-        reviewService.deleteReview(reviewId)
+    @DeleteMapping("/{userId}/{productId}")
+    fun deleteReview(
+        @PathVariable userId: String,
+        @PathVariable productId: String,
+        response: ServerHttpResponse
+    ) =
+        reviewService.deleteReview(
+            userId,
+            productId,
+            response
+        )
 
     @GetMapping
     fun getProductReview(
