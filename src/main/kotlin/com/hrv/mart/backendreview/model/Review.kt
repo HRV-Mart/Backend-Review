@@ -21,8 +21,7 @@ data class Review(
         description: String,
         images: List<String>,
         id: String
-    ) :
-            this(userId, productId, name, description, images) {
+    ) : this(userId, productId, name, description, images) {
         this.id = id
     }
     fun setIdToDefault(): Review {
