@@ -7,11 +7,10 @@ import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 
 @Service
-class ReviewService (
+class ReviewService(
     @Autowired
     private val reviewRepository: ReviewRepository
-)
-{
+) {
     fun createReview(review: Review) =
         reviewRepository.insert(review.setIdToDefault())
     fun updateReview(review: Review) =
@@ -20,8 +19,7 @@ class ReviewService (
                 if (it) {
                     reviewRepository.save(review)
                         .then(Mono.just("Review Updated successfully"))
-                }
-                else {
+                } else {
                     Mono.just("Review Not Found")
                 }
             }

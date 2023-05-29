@@ -8,6 +8,6 @@ class BackendReviewApplicationTests {
 
     @Test
     fun contextLoads() {
+        main(emptyArray())
     }
-
 }

@@ -117,7 +117,7 @@ naming:
 
 performance:
   SpreadOperator:
-    excludes: ['**/test/**', '**/functionalTest/**']
+    excludes: ['**/test/**', '**/functionalTest/**', '**/BackendReviewApplication.kt']
 
 potential-bugs:
   AvoidReferentialEquality:
@@ -268,7 +268,6 @@ style:
     ignoreAnnotated: ['Parameter']
   WildcardImport:
     active: true
-    excludeImports: [
-      org.springframework.web.bind.annotation.*,
-      java.util.*
-    ]
+    excludeImports:
+      - org.springframework.web.bind.annotation.*
+      - java.util.*
