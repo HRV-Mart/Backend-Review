@@ -3,7 +3,9 @@ package com.hrv.mart.backendreview.controller
 import com.hrv.mart.backendreview.model.Review
 import com.hrv.mart.backendreview.service.ReviewService
 import com.hrv.mart.custompageable.CustomPageRequest
+import com.hrv.mart.custompageable.Pageable
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
 import org.springframework.http.server.reactive.ServerHttpResponse
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import reactor.core.publisher.Mono
 import java.util.Optional
 
 @RestController
@@ -50,20 +53,22 @@ class ReviewController(
         @RequestParam size: Optional<Int>,
         @RequestParam page: Optional<Int>,
         response: ServerHttpResponse
-    ) {
+    ) : Mono<Pageable<Review>> {
         val pageRequest = CustomPageRequest.getPageRequest(
             optionalPage = page,
             optionalSize = size
         )
         if (productId.isPresent) {
-            if (userId.isPresent) {
+            return if (userId.isPresent) {
+                response.statusCode = HttpStatus.OK
                 reviewService
                     .getProductReviewPostedByUser(
                         productId.get(),
-                        userId.get()
+                        userId.get(),
+                        pageRequest
                     )
-            }
-            else {
+            } else {
+                response.statusCode = HttpStatus.OK
                 reviewService
                     .getProductReviews(
                         productId.get(),
@@ -72,14 +77,16 @@ class ReviewController(
             }
         }
         else {
-            if (userId.isPresent) {
-                reviewService.getUserReview(
-                    userId.get(),
-                    pageRequest
-                )
-            }
-            else {
-                TODO("NOT IMPLEMENTED")
+            return if (userId.isPresent) {
+                response.statusCode = HttpStatus.OK
+                reviewService
+                    .getUserReview(
+                        userId.get(),
+                        pageRequest
+                    )
+            } else {
+                response.statusCode = HttpStatus.NOT_IMPLEMENTED
+                Mono.empty()
             }
         }
     }

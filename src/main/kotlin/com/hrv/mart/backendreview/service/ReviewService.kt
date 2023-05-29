@@ -2,11 +2,13 @@ package com.hrv.mart.backendreview.service
 
 import com.hrv.mart.backendreview.model.Review
 import com.hrv.mart.backendreview.repository.ReviewRepository
+import com.hrv.mart.custompageable.Pageable
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.server.reactive.ServerHttpResponse
 import org.springframework.stereotype.Service
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 @Service
@@ -55,23 +57,61 @@ class ReviewService(
         productId: String,
         pageRequest: PageRequest
     ) =
-        reviewRepository.findByProductId(
-            productId,
-            pageRequest
+        getPageable(data = reviewRepository
+            .findByProductId(
+                productId,
+                pageRequest
+            ),
+            count = reviewRepository
+                .countByProductId(productId),
+            pageRequest=pageRequest
         )
+
     fun getUserReview(userId: String, pageRequest: PageRequest) =
-        reviewRepository.findByUserId(
-            userId,
-            pageRequest
+        getPageable(data = reviewRepository
+            .findByUserId(
+                userId,
+                pageRequest
+            ),
+            count = reviewRepository
+                .countByUserId(userId),
+            pageRequest=pageRequest
         )
     fun getProductReviewPostedByUser(
         productId: String,
-        userId: String
+        userId: String,
+        pageRequest: PageRequest
     ) =
         reviewRepository.findByUserIdAndProductId(
             userId,
             productId
         )
-    fun getReviewById(reviewId: String) =
-        reviewRepository.findById(reviewId)
+            .map {  review ->
+                val count = 1L
+                Pageable(
+                    data = listOf(review),
+                    nextPage = Pageable.getNextPage(
+                        pageSize = pageRequest.pageSize.toLong(),
+                        page = pageRequest.pageNumber.toLong(),
+                        totalSize = count
+                    ),
+                    size = count
+                )
+            }
+    private fun <T> getPageable(data: Flux<T>, count: Mono<Long>, pageRequest: PageRequest) =
+        data.collectList()
+            .flatMap { reviews ->
+                count
+                    .map { totalSize ->
+                        Pageable(
+                            data = reviews,
+                            nextPage = Pageable.getNextPage(
+                                pageSize = pageRequest.pageSize.toLong(),
+                                page = pageRequest.pageNumber.toLong(),
+                                totalSize = totalSize
+                            ),
+                            size = pageRequest.pageSize.toLong()
+                        )
+                    }
+            }
 }
