@@ -19,12 +19,11 @@ class ReviewService(
     ) =
         reviewRepository
             .existsByUserIdAndProductId(review.userId, review.productId)
-            .flatMap {isExist ->
+            .flatMap { isExist ->
                 if (isExist) {
                     response.statusCode = HttpStatus.INTERNAL_SERVER_ERROR
                     Mono.just("Review already exist")
-                }
-                else {
+                } else {
                     response.statusCode = HttpStatus.OK
                     reviewRepository
                         .insert(review)
@@ -40,13 +39,12 @@ class ReviewService(
             userId,
             productId
         )
-            .flatMap {exist ->
+            .flatMap { exist ->
                 if (exist) {
                     response.statusCode = HttpStatus.OK
                     reviewRepository.deleteByUserIdAndProductId(userId, productId)
                         .then(Mono.just("Review deleted successfully"))
-                }
-                else {
+                } else {
                     response.statusCode = HttpStatus.NOT_FOUND
                     Mono.just("Review not found")
                 }
