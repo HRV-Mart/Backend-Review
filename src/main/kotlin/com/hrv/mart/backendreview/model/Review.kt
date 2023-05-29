@@ -14,7 +14,14 @@ data class Review(
 ) {
     @Id
     var id: String = ObjectId().toString()
-    constructor(userId: String, productId: String, name: String, description: String, images: List<String>, id: String) :
+    constructor(
+        userId: String,
+        productId: String,
+        name: String,
+        description: String,
+        images: List<String>,
+        id: String
+    ) :
             this(userId, productId, name, description, images) {
         this.id = id
     }
