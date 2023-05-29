@@ -3,6 +3,7 @@ package com.hrv.mart.backendreview.service
 import com.hrv.mart.backendreview.model.Review
 import com.hrv.mart.backendreview.repository.ReviewRepository
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.server.reactive.ServerHttpResponse
 import org.springframework.stereotype.Service
@@ -50,14 +51,27 @@ class ReviewService(
                 }
             }
 
-    fun getProductReviews(productId: String) =
-        reviewRepository.findByProductId(productId)
-    fun getUserReview(userId: String) =
-        reviewRepository.findByUserId(userId)
-    fun getProductReviewPostedByUser(productId: String, userId: String) =
-        reviewRepository.findByUserIdAndProductId(userId, productId)
-    fun getAllReview() =
-        reviewRepository.findAll()
+    fun getProductReviews(
+        productId: String,
+        pageRequest: PageRequest
+    ) =
+        reviewRepository.findByProductId(
+            productId,
+            pageRequest
+        )
+    fun getUserReview(userId: String, pageRequest: PageRequest) =
+        reviewRepository.findByUserId(
+            userId,
+            pageRequest
+        )
+    fun getProductReviewPostedByUser(
+        productId: String,
+        userId: String
+    ) =
+        reviewRepository.findByUserIdAndProductId(
+            userId,
+            productId
+        )
     fun getReviewById(reviewId: String) =
         reviewRepository.findById(reviewId)
 }

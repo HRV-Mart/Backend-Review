@@ -2,6 +2,7 @@ package com.hrv.mart.backendreview.controller
 
 import com.hrv.mart.backendreview.model.Review
 import com.hrv.mart.backendreview.service.ReviewService
+import com.hrv.mart.custompageable.CustomPageRequest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.server.reactive.ServerHttpResponse
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -45,27 +46,41 @@ class ReviewController(
     @GetMapping
     fun getProductReview(
         @RequestParam productId: Optional<String>,
-        @RequestParam userId: Optional<String>
-//        @RequestParam size: Optional<Int>,
-//        @RequestParam page: Optional<Int>
-    ) =
+        @RequestParam userId: Optional<String>,
+        @RequestParam size: Optional<Int>,
+        @RequestParam page: Optional<Int>,
+        response: ServerHttpResponse
+    ) {
+        val pageRequest = CustomPageRequest.getPageRequest(
+            optionalPage = page,
+            optionalSize = size
+        )
         if (productId.isPresent) {
             if (userId.isPresent) {
                 reviewService
-                    .getProductReviewPostedByUser(productId.get(), userId.get())
-            } else {
-                reviewService
-                    .getProductReviews(productId.get())
+                    .getProductReviewPostedByUser(
+                        productId.get(),
+                        userId.get()
+                    )
             }
-        } else {
-            if (userId.isPresent) {
-                reviewService.getUserReview(userId.get())
-            } else {
-                reviewService.getAllReview()
+            else {
+                reviewService
+                    .getProductReviews(
+                        productId.get(),
+                        pageRequest
+                    )
             }
         }
-
-    @GetMapping("/{reviewID}")
-    fun getReviewById(@PathVariable reviewID: String) =
-        reviewService.getReviewById(reviewID)
+        else {
+            if (userId.isPresent) {
+                reviewService.getUserReview(
+                    userId.get(),
+                    pageRequest
+                )
+            }
+            else {
+                TODO("NOT IMPLEMENTED")
+            }
+        }
+    }
 }
