@@ -89,4 +89,39 @@ class BackendReviewControllerTest {
             .expectNext("Review already exist")
             .verifyComplete()
     }
+    @Test
+    fun `should delete review from database if it exist`() {
+        val review = allReviews.random()
+        doReturn(Mono.just(true))
+            .`when`(reviewRepository)
+            .existsByUserIdAndProductId(review.userId, review.productId)
+        doReturn(Mono.empty<Void>())
+            .`when`(reviewRepository)
+            .deleteByUserIdAndProductId(review.userId, review.productId)
+        StepVerifier.create(
+            reviewController.deleteReview(
+                review.userId,
+                review.productId,
+                response
+            )
+        )
+            .expectNext("Review deleted successfully")
+            .verifyComplete()
+    }
+    @Test
+    fun `should not delete review from database if it does not  exist`() {
+        val review = allReviews.random()
+        doReturn(Mono.just(false))
+            .`when`(reviewRepository)
+            .existsByUserIdAndProductId(review.userId, review.productId)
+        StepVerifier.create(
+            reviewController.deleteReview(
+                review.userId,
+                review.productId,
+                response
+            )
+        )
+            .expectNext("Review not found")
+            .verifyComplete()
+    }
 }
