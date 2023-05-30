@@ -199,4 +199,35 @@ class BackendReviewControllerTest {
             ))
             .verifyComplete()
     }
+    @Test
+    fun `should return user review on product`() {
+        val review = allReviews.random()
+        val userId = review.userId
+        val productId = review.productId
+
+        val page = Optional.of(0)
+        val size = Optional.of(10)
+        val userProductReview = allReviews.filter {
+            it.productId == productId && it.userId == userId
+        }
+
+        doReturn(Mono.just(review))
+            .`when`(reviewRepository)
+            .findByUserIdAndProductId(userId, productId)
+        StepVerifier.create(
+            reviewController.getProductReview(
+                page = page,
+                size = size,
+                userId = Optional.of(userId),
+                productId = Optional.of(productId),
+                response = response
+            )
+        )
+            .expectNext(Pageable(
+                size = size.get().toLong(),
+                data = userProductReview,
+                nextPage = null
+            ))
+            .verifyComplete()
+    }
 }
