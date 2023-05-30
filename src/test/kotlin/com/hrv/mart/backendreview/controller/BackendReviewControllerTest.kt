@@ -10,12 +10,16 @@ import com.hrv.mart.backendreview.fixture.ReviewFixture.userId2
 import com.hrv.mart.backendreview.model.Review
 import com.hrv.mart.backendreview.repository.ReviewRepository
 import com.hrv.mart.backendreview.service.ReviewService
+import com.hrv.mart.custompageable.CustomPageRequest
+import com.hrv.mart.custompageable.Pageable
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.mock
 import org.springframework.http.server.reactive.ServerHttpResponse
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
+import java.util.*
 
 class BackendReviewControllerTest {
     private val response = mock(ServerHttpResponse::class.java)
@@ -122,6 +126,40 @@ class BackendReviewControllerTest {
             )
         )
             .expectNext("Review not found")
+            .verifyComplete()
+    }
+    @Test
+    fun `should get all reviews of user`() {
+        val userId = allReviews.random().userId
+        val page = Optional.of(0)
+        val size = Optional.of(10)
+        val userReview = allReviews.filter {
+            it.userId == userId
+        }
+        val pageRequest = CustomPageRequest.getPageRequest(
+            optionalPage = page,
+            optionalSize = size
+        )
+        doReturn(Flux.just(*userReview.toTypedArray()))
+            .`when`(reviewRepository)
+            .findByUserId(userId, pageRequest)
+        doReturn(Mono.just(userReview.size.toLong()))
+            .`when`(reviewRepository)
+            .countByUserId(userId)
+        StepVerifier.create(
+            reviewController.getProductReview(
+                page = page,
+                size = size,
+                userId = Optional.of(userId),
+                productId = Optional.empty(),
+                response = response
+            )
+        )
+            .expectNext(Pageable(
+                size = size.get().toLong(),
+                nextPage = null,
+                data = userReview
+            ))
             .verifyComplete()
     }
 }
