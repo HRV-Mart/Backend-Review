@@ -162,4 +162,41 @@ class BackendReviewControllerTest {
             ))
             .verifyComplete()
     }
+    @Test
+    fun `should return product reviews`() {
+        val productId = allReviews.random().productId
+
+        val page = Optional.of(0)
+        val size = Optional.of(10)
+        val productReview = allReviews.filter {
+            it.productId == productId
+        }
+        val pageRequest = CustomPageRequest.getPageRequest(
+            optionalPage = page,
+            optionalSize = size
+        )
+
+        doReturn(Flux.just(*productReview.toTypedArray()))
+            .`when`(reviewRepository)
+            .findByProductId(productId, pageRequest)
+        doReturn(Mono.just(productReview.size.toLong()))
+            .`when`(reviewRepository)
+            .countByProductId(productId)
+
+        StepVerifier.create(
+            reviewController.getProductReview(
+                page = page,
+                size = size,
+                userId = Optional.empty(),
+                productId = Optional.of(productId),
+                response = response
+            )
+        )
+            .expectNext(Pageable(
+                size = size.get().toLong(),
+                data = productReview,
+                nextPage = null
+            ))
+            .verifyComplete()
+    }
 }
