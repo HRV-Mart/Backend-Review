@@ -73,4 +73,20 @@ class BackendReviewControllerTest {
             .expectNext("Review created successfully")
             .verifyComplete()
     }
+    @Test
+    fun `should not add review in database if it already exist`() {
+        val review = allReviews.random()
+        doReturn(Mono.just(true))
+            .`when`(reviewRepository)
+            .existsByUserIdAndProductId(review.userId, review.productId)
+        StepVerifier.create(
+            reviewController
+                .createReview(
+                    review,
+                    response
+                )
+        )
+            .expectNext("Review already exist")
+            .verifyComplete()
+    }
 }
