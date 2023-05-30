@@ -77,6 +77,7 @@ class BackendReviewControllerTest {
             .expectNext("Review created successfully")
             .verifyComplete()
     }
+
     @Test
     fun `should not add review in database if it already exist`() {
         val review = allReviews.random()
@@ -93,6 +94,7 @@ class BackendReviewControllerTest {
             .expectNext("Review already exist")
             .verifyComplete()
     }
+
     @Test
     fun `should delete review from database if it exist`() {
         val review = allReviews.random()
@@ -112,6 +114,7 @@ class BackendReviewControllerTest {
             .expectNext("Review deleted successfully")
             .verifyComplete()
     }
+
     @Test
     fun `should not delete review from database if it does not  exist`() {
         val review = allReviews.random()
@@ -128,6 +131,7 @@ class BackendReviewControllerTest {
             .expectNext("Review not found")
             .verifyComplete()
     }
+
     @Test
     fun `should get all reviews of user`() {
         val userId = allReviews.random().userId
@@ -155,13 +159,16 @@ class BackendReviewControllerTest {
                 response = response
             )
         )
-            .expectNext(Pageable(
-                size = size.get().toLong(),
-                nextPage = null,
-                data = userReview
-            ))
+            .expectNext(
+                Pageable(
+                    size = size.get().toLong(),
+                    nextPage = null,
+                    data = userReview
+                )
+            )
             .verifyComplete()
     }
+
     @Test
     fun `should return product reviews`() {
         val productId = allReviews.random().productId
@@ -192,13 +199,16 @@ class BackendReviewControllerTest {
                 response = response
             )
         )
-            .expectNext(Pageable(
-                size = size.get().toLong(),
-                data = productReview,
-                nextPage = null
-            ))
+            .expectNext(
+                Pageable(
+                    size = size.get().toLong(),
+                    data = productReview,
+                    nextPage = null
+                )
+            )
             .verifyComplete()
     }
+
     @Test
     fun `should return user review on product`() {
         val review = allReviews.random()
@@ -223,11 +233,13 @@ class BackendReviewControllerTest {
                 response = response
             )
         )
-            .expectNext(Pageable(
-                size = size.get().toLong(),
-                data = userProductReview,
-                nextPage = null
-            ))
+            .expectNext(
+                Pageable(
+                    size = size.get().toLong(),
+                    data = userProductReview,
+                    nextPage = null
+                )
+            )
             .verifyComplete()
     }
 }
