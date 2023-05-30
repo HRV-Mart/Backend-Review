@@ -95,7 +95,7 @@ class ReviewService(
                         page = pageRequest.pageNumber.toLong(),
                         totalSize = count
                     ),
-                    size = count
+                    size = pageRequest.pageSize.toLong()
                 )
             }
     private fun <T> getPageable(data: Flux<T>, count: Mono<Long>, pageRequest: PageRequest) =
