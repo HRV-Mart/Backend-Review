@@ -53,7 +53,7 @@ class ReviewController(
         @RequestParam size: Optional<Int>,
         @RequestParam page: Optional<Int>,
         response: ServerHttpResponse
-    ) : Mono<Pageable<Review>> {
+    ): Mono<Pageable<Review>> {
         val pageRequest = CustomPageRequest.getPageRequest(
             optionalPage = page,
             optionalSize = size
@@ -75,8 +75,7 @@ class ReviewController(
                         pageRequest
                     )
             }
-        }
-        else {
+        } else {
             return if (userId.isPresent) {
                 response.statusCode = HttpStatus.OK
                 reviewService

@@ -57,25 +57,30 @@ class ReviewService(
         productId: String,
         pageRequest: PageRequest
     ) =
-        getPageable(data = reviewRepository
-            .findByProductId(
-                productId,
-                pageRequest
-            ),
+        getPageable(
+            data = reviewRepository
+                .findByProductId(
+                    productId,
+                    pageRequest
+                ),
             count = reviewRepository
                 .countByProductId(productId),
-            pageRequest=pageRequest
+            pageRequest = pageRequest
         )
 
-    fun getUserReview(userId: String, pageRequest: PageRequest) =
-        getPageable(data = reviewRepository
-            .findByUserId(
-                userId,
-                pageRequest
-            ),
+    fun getUserReview(
+        userId: String,
+        pageRequest: PageRequest
+    ) =
+        getPageable(
+            data = reviewRepository
+                .findByUserId(
+                    userId,
+                    pageRequest
+                ),
             count = reviewRepository
                 .countByUserId(userId),
-            pageRequest=pageRequest
+            pageRequest = pageRequest
         )
     fun getProductReviewPostedByUser(
         productId: String,
@@ -86,7 +91,7 @@ class ReviewService(
             userId,
             productId
         )
-            .map {  review ->
+            .map { review ->
                 val count = 1L
                 Pageable(
                     data = listOf(review),
