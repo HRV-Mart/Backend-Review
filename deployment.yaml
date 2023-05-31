@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-review-deployment
+  labels:
+    app: review
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: review
+  template:
+    metadata:
+      labels:
+        app: review
+    spec:
+      containers:
+        - name: backend-review
+          image: harsh3305/hrv-mart-backend-review
+          ports:
+            - containerPort: 8086
+          imagePullPolicy: Always
+          env:
+            - name: MONGODB_URI
+              valueFrom:
+                configMapKeyRef:
+                  key: mongodb-uri
+                  name: config-map
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-review-service
+spec:
+  selector:
+    app: review
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 8081
+      targetPort: 8086
+      nodePort: 30006
