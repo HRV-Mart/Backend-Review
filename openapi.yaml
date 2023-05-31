@@ -1,0 +1,155 @@
+openapi: 3.0.3
+info:
+  title: Backend Review
+  description: |-
+    This is Review micorservice for backend of **HRV-Mart**. This API will contains operations related to Review and have its own database. For more information, visit
+  contact:
+    email: harshverma3305@gmail.com
+    name: Harsh Verma
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  version: 0.0.1
+servers:
+  - url: http://localhost:8080
+tags:
+  - name: review
+    description: Operations about review
+paths:
+  /review:
+    post:
+      tags:
+        - review
+      summary: Create review
+      description: This operation is not meant to be expose publicly.
+      operationId: createReview
+      requestBody:
+        description: Created review object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Review'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/Review'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Review'
+      responses:
+        default:
+          description: Review created successfully
+        '500':
+          description: Review already exist
+  /review?userId={userId}&productId={productId}&page={page}&size={size}:
+    get:
+      tags:
+        - review
+      summary: Get review by reviewId
+      description: ''
+      operationId: getReview
+      parameters:
+        - name: userId
+          in: path
+          description: userId of user
+          example: userId1
+          required: false
+          schema:
+            type: string
+        - name: productId
+          in: path
+          description: productId of product
+          example: productId1
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: path
+          description: page index
+          example: 0
+          required: false
+          schema:
+            type: number
+        - name: size
+          in: path
+          description: pge size
+          example: 10
+          required: false
+          schema:
+            type: number
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewPageable'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ReviewPageable'
+        '404':
+          description: Review not found
+  /review/{userId}/{productId}:
+    delete:
+      tags:
+        - review
+      summary: Delete review
+      operationId: deleteUser
+      parameters:
+        - name: userId
+          in: path
+          description: The userId of user
+          required: true
+          schema:
+            type: string
+        - name: productId
+          in: path
+          description: The productId of product
+          required: true
+          schema:
+            type: string
+      responses:
+        default:
+          description: Review deleted successfully
+        '404':
+          description: Review not found
+components:
+  schemas:
+    Review:
+      type: object
+      properties:
+        userId:
+          type: string
+          example: userId1
+          description: This will be use as userID.
+        productId:
+          type: string
+          example: productId1
+          description: This will be use as productId.
+        title:
+          type: string
+          example: Test Review
+        images:
+          type: array
+          items:
+            type: string
+          example: [https://image.test.com/1, https://image.test.com/2]
+        description:
+          type: string
+          example: Test Description
+      xml:
+        name: review
+    ReviewPageable:
+      type: object
+      properties:
+        size:
+          type: number
+          example: 10
+          description: Maximum review object which can be retrieve from database
+        nextPage:
+          type: number
+          example: 2
+          description: Next page index if available else it will be null
+        data:
+          type: array
+          items:
+            type: object
