@@ -263,7 +263,6 @@ class BackendReviewControllerTest {
         val productId = review.productId
         val userId = review.userId
 
-
         val page = Optional.of(0)
         val size = Optional.of(10)
 
@@ -294,7 +293,7 @@ class BackendReviewControllerTest {
                     size = size.get().toLong(),
                     nextPage = null,
                     data = listOf(review)
-                        .map { it ->
+                        .map {
                             ReviewResponse(
                                 review = it,
                                 user = allUsers.first { user ->
