@@ -189,7 +189,7 @@ class BackendReviewControllerTest {
         )
             .expectNext(
                 Pageable(
-                    size = allReviews.size.toLong(),
+                    size = size.get().toLong(),
                     nextPage = null,
                     data = reviews
                         .map {
@@ -200,6 +200,7 @@ class BackendReviewControllerTest {
                         }
                 )
             )
+            .verifyComplete()
     }
 
     @Test
@@ -228,15 +229,32 @@ class BackendReviewControllerTest {
                 .getUserDetails(user.emailId)
         }
 
-        StepVerifier.create(
-            reviewController.getProductReview(
-                productId = Optional.of(productId),
-                userId = Optional.empty(),
-                size,
-                page,
-                response
+        StepVerifier
+            .create(
+                reviewController.getProductReview(
+                    productId = Optional.of(productId),
+                    userId = Optional.empty(),
+                    size,
+                    page,
+                    response
+                )
             )
-        )
+            .expectNext(
+                Pageable(
+                    size = size.get().toLong(),
+                    nextPage = null,
+                    data = reviews
+                        .map { review ->
+                            ReviewResponse(
+                                review = review,
+                                user = allUsers.first { user ->
+                                    user.emailId == review.userId
+                                }
+                            )
+                        }
+                )
+            )
+            .verifyComplete()
     }
 
     @Test
@@ -244,39 +262,48 @@ class BackendReviewControllerTest {
         val review = allReviews.random()
         val productId = review.productId
         val userId = review.userId
-        val reviews = allReviews
-            .filter {
-                it.productId == productId && it.userId == userId
-            }
+
 
         val page = Optional.of(0)
         val size = Optional.of(10)
 
-        val pageRequest = CustomPageRequest.getPageRequest(
-            optionalPage = page,
-            optionalSize = size
-        )
-
-        doReturn(Flux.just(*reviews.toTypedArray()))
+        doReturn(Mono.just(review))
             .`when`(reviewRepository)
-            .findByProductId(productId, pageRequest)
-        doReturn(Mono.just(reviews.size.toLong()))
-            .`when`(reviewRepository)
-            .countByProductId(productId)
+            .findByUserIdAndProductId(
+                userId,
+                productId
+            )
         for (user in allUsers) {
             doReturn(Mono.just(user))
                 .`when`(userRepository)
                 .getUserDetails(user.emailId)
         }
 
-        StepVerifier.create(
-            reviewController.getProductReview(
-                productId = Optional.of(productId),
-                userId = Optional.empty(),
-                size,
-                page,
-                response
+        StepVerifier
+            .create(
+                reviewController.getProductReview(
+                    productId = Optional.of(productId),
+                    userId = Optional.of(userId),
+                    size,
+                    page,
+                    response
+                )
             )
-        )
+            .expectNext(
+                Pageable(
+                    size = size.get().toLong(),
+                    nextPage = null,
+                    data = listOf(review)
+                        .map { it ->
+                            ReviewResponse(
+                                review = it,
+                                user = allUsers.first { user ->
+                                    user.emailId == review.userId
+                                }
+                            )
+                        }
+                )
+            )
+            .verifyComplete()
     }
 }
