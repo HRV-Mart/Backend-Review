@@ -8,10 +8,13 @@ import com.hrv.mart.backendreview.fixture.ReviewFixture.title
 import com.hrv.mart.backendreview.fixture.ReviewFixture.userId1
 import com.hrv.mart.backendreview.fixture.ReviewFixture.userId2
 import com.hrv.mart.backendreview.model.Review
+import com.hrv.mart.backendreview.model.ReviewResponse
 import com.hrv.mart.backendreview.repository.ReviewRepository
 import com.hrv.mart.backendreview.service.ReviewService
 import com.hrv.mart.custompageable.CustomPageRequest
 import com.hrv.mart.custompageable.Pageable
+import com.hrv.mart.userlibrary.model.User
+import com.hrv.mart.userlibrary.repository.UserRepository
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.mock
@@ -24,7 +27,8 @@ import java.util.*
 class BackendReviewControllerTest {
     private val response = mock(ServerHttpResponse::class.java)
     private val reviewRepository = mock(ReviewRepository::class.java)
-    private val reviewService = ReviewService(reviewRepository)
+    private val userRepository = mock(UserRepository::class.java)
+    private val reviewService = ReviewService(reviewRepository, userRepository)
     private val reviewController = ReviewController(reviewService)
 
     private val allReviews = listOf(
@@ -55,6 +59,16 @@ class BackendReviewControllerTest {
             images = images,
             description = description,
             title = title
+        )
+    )
+    private val allUsers = listOf(
+        User(
+            name = "Test User",
+            emailId = userId1
+        ),
+        User(
+            name = "Test User",
+            emailId = userId2
         )
     )
 
@@ -137,13 +151,25 @@ class BackendReviewControllerTest {
         val userId = allReviews.random().userId
         val page = Optional.of(0)
         val size = Optional.of(10)
-        val userReview = allReviews.filter {
-            it.userId == userId
-        }
+        val userReview = allReviews
+            .filter {
+                it.userId == userId
+            }
+            .map { review ->
+                ReviewResponse(
+                    review = review,
+                    user = allUsers.first { it.emailId == review.userId }
+                )
+            }
         val pageRequest = CustomPageRequest.getPageRequest(
             optionalPage = page,
             optionalSize = size
         )
+        for (user in allUsers) {
+            doReturn(Mono.just(user))
+                .`when`(userRepository)
+                .getUserDetails(user.emailId)
+        }
         doReturn(Flux.just(*userReview.toTypedArray()))
             .`when`(reviewRepository)
             .findByUserId(userId, pageRequest)
@@ -175,14 +201,25 @@ class BackendReviewControllerTest {
 
         val page = Optional.of(0)
         val size = Optional.of(10)
-        val productReview = allReviews.filter {
-            it.productId == productId
-        }
+        val productReview = allReviews
+            .filter {
+                it.productId == productId
+            }
+            .map { review ->
+                ReviewResponse(
+                    review = review,
+                    user = allUsers.first { it.emailId == review.userId }
+                )
+            }
         val pageRequest = CustomPageRequest.getPageRequest(
             optionalPage = page,
             optionalSize = size
         )
-
+        for (user in allUsers) {
+            doReturn(Mono.just(user))
+                .`when`(userRepository)
+                .getUserDetails(user.emailId)
+        }
         doReturn(Flux.just(*productReview.toTypedArray()))
             .`when`(reviewRepository)
             .findByProductId(productId, pageRequest)
@@ -217,10 +254,21 @@ class BackendReviewControllerTest {
 
         val page = Optional.of(0)
         val size = Optional.of(10)
-        val userProductReview = allReviews.filter {
-            it.productId == productId && it.userId == userId
+        val userProductReview = allReviews
+            .filter {
+                it.productId == productId && it.userId == userId
+            }
+            .map { userReview ->
+                ReviewResponse(
+                    review = userReview,
+                    user = allUsers.first { it.emailId == userReview.userId }
+                )
+            }
+        for (user in allUsers) {
+            doReturn(Mono.just(user))
+                .`when`(userRepository)
+                .getUserDetails(user.emailId)
         }
-
         doReturn(Mono.just(review))
             .`when`(reviewRepository)
             .findByUserIdAndProductId(userId, productId)
