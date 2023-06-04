@@ -26,6 +26,11 @@ spec:
                 configMapKeyRef:
                   key: mongodb-uri
                   name: config-map
+            - name: USER_URL
+              valueFrom:
+                configMapKeyRef:
+                  key: user-server-url
+                  name: config-map
 ---
 apiVersion: v1
 kind: Service

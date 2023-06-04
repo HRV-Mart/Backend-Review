@@ -1,6 +1,7 @@
 package com.hrv.mart.backendreview.controller
 
 import com.hrv.mart.backendreview.model.Review
+import com.hrv.mart.backendreview.model.ReviewResponse
 import com.hrv.mart.backendreview.service.ReviewService
 import com.hrv.mart.custompageable.CustomPageRequest
 import com.hrv.mart.custompageable.Pageable
@@ -53,7 +54,7 @@ class ReviewController(
         @RequestParam size: Optional<Int>,
         @RequestParam page: Optional<Int>,
         response: ServerHttpResponse
-    ): Mono<Pageable<Review>> {
+    ): Mono<Pageable<ReviewResponse>> {
         val pageRequest = CustomPageRequest.getPageRequest(
             optionalPage = page,
             optionalSize = size

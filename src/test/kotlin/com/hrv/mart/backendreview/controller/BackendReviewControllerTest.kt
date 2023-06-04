@@ -8,10 +8,13 @@ import com.hrv.mart.backendreview.fixture.ReviewFixture.title
 import com.hrv.mart.backendreview.fixture.ReviewFixture.userId1
 import com.hrv.mart.backendreview.fixture.ReviewFixture.userId2
 import com.hrv.mart.backendreview.model.Review
+import com.hrv.mart.backendreview.model.ReviewResponse
 import com.hrv.mart.backendreview.repository.ReviewRepository
 import com.hrv.mart.backendreview.service.ReviewService
 import com.hrv.mart.custompageable.CustomPageRequest
 import com.hrv.mart.custompageable.Pageable
+import com.hrv.mart.userlibrary.model.User
+import com.hrv.mart.userlibrary.repository.UserRepository
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.mock
@@ -24,7 +27,8 @@ import java.util.*
 class BackendReviewControllerTest {
     private val response = mock(ServerHttpResponse::class.java)
     private val reviewRepository = mock(ReviewRepository::class.java)
-    private val reviewService = ReviewService(reviewRepository)
+    private val userRepository = mock(UserRepository::class.java)
+    private val reviewService = ReviewService(reviewRepository, userRepository)
     private val reviewController = ReviewController(reviewService)
 
     private val allReviews = listOf(
@@ -55,6 +59,16 @@ class BackendReviewControllerTest {
             images = images,
             description = description,
             title = title
+        )
+    )
+    private val allUsers = listOf(
+        User(
+            name = "Test User",
+            emailId = userId1
+        ),
+        User(
+            name = "Test User",
+            emailId = userId2
         )
     )
 
@@ -134,36 +148,56 @@ class BackendReviewControllerTest {
 
     @Test
     fun `should get all reviews of user`() {
-        val userId = allReviews.random().userId
+        val user = allUsers.random()
+        val userId = user.emailId
+        val reviews = allReviews
+            .filter {
+                it.userId == userId
+            }
+
         val page = Optional.of(0)
         val size = Optional.of(10)
-        val userReview = allReviews.filter {
-            it.userId == userId
-        }
+
         val pageRequest = CustomPageRequest.getPageRequest(
             optionalPage = page,
             optionalSize = size
         )
-        doReturn(Flux.just(*userReview.toTypedArray()))
+
+        doReturn(Flux.just(*reviews.toTypedArray()))
             .`when`(reviewRepository)
-            .findByUserId(userId, pageRequest)
-        doReturn(Mono.just(userReview.size.toLong()))
+            .findByUserId(
+                userId = userId,
+                pageRequest = pageRequest
+            )
+        doReturn(Mono.just(reviews.size.toLong()))
             .`when`(reviewRepository)
             .countByUserId(userId)
+        for (currentUser in allUsers) {
+            doReturn(Mono.just(currentUser))
+                .`when`(userRepository)
+                .getUserDetails(currentUser.emailId)
+        }
+
         StepVerifier.create(
             reviewController.getProductReview(
-                page = page,
-                size = size,
-                userId = Optional.of(userId),
                 productId = Optional.empty(),
-                response = response
+                userId = Optional.of(userId),
+                size,
+                page,
+                response
             )
         )
             .expectNext(
                 Pageable(
                     size = size.get().toLong(),
                     nextPage = null,
-                    data = userReview
+                    data = reviews
+                        .map {
+                            ReviewResponse(
+                                review = it,
+                                user = user
+                            )
+                        }
                 )
             )
             .verifyComplete()
@@ -172,38 +206,52 @@ class BackendReviewControllerTest {
     @Test
     fun `should return product reviews`() {
         val productId = allReviews.random().productId
+        val reviews = allReviews
+            .filter { it.productId == productId }
 
         val page = Optional.of(0)
         val size = Optional.of(10)
-        val productReview = allReviews.filter {
-            it.productId == productId
-        }
+
         val pageRequest = CustomPageRequest.getPageRequest(
             optionalPage = page,
             optionalSize = size
         )
 
-        doReturn(Flux.just(*productReview.toTypedArray()))
+        doReturn(Flux.just(*reviews.toTypedArray()))
             .`when`(reviewRepository)
             .findByProductId(productId, pageRequest)
-        doReturn(Mono.just(productReview.size.toLong()))
+        doReturn(Mono.just(reviews.size.toLong()))
             .`when`(reviewRepository)
             .countByProductId(productId)
+        for (user in allUsers) {
+            doReturn(Mono.just(user))
+                .`when`(userRepository)
+                .getUserDetails(user.emailId)
+        }
 
-        StepVerifier.create(
-            reviewController.getProductReview(
-                page = page,
-                size = size,
-                userId = Optional.empty(),
-                productId = Optional.of(productId),
-                response = response
+        StepVerifier
+            .create(
+                reviewController.getProductReview(
+                    productId = Optional.of(productId),
+                    userId = Optional.empty(),
+                    size,
+                    page,
+                    response
+                )
             )
-        )
             .expectNext(
                 Pageable(
                     size = size.get().toLong(),
-                    data = productReview,
-                    nextPage = null
+                    nextPage = null,
+                    data = reviews
+                        .map { review ->
+                            ReviewResponse(
+                                review = review,
+                                user = allUsers.first { user ->
+                                    user.emailId == review.userId
+                                }
+                            )
+                        }
                 )
             )
             .verifyComplete()
@@ -212,32 +260,47 @@ class BackendReviewControllerTest {
     @Test
     fun `should return user review on product`() {
         val review = allReviews.random()
-        val userId = review.userId
         val productId = review.productId
+        val userId = review.userId
 
         val page = Optional.of(0)
         val size = Optional.of(10)
-        val userProductReview = allReviews.filter {
-            it.productId == productId && it.userId == userId
-        }
 
         doReturn(Mono.just(review))
             .`when`(reviewRepository)
-            .findByUserIdAndProductId(userId, productId)
-        StepVerifier.create(
-            reviewController.getProductReview(
-                page = page,
-                size = size,
-                userId = Optional.of(userId),
-                productId = Optional.of(productId),
-                response = response
+            .findByUserIdAndProductId(
+                userId,
+                productId
             )
-        )
+        for (user in allUsers) {
+            doReturn(Mono.just(user))
+                .`when`(userRepository)
+                .getUserDetails(user.emailId)
+        }
+
+        StepVerifier
+            .create(
+                reviewController.getProductReview(
+                    productId = Optional.of(productId),
+                    userId = Optional.of(userId),
+                    size,
+                    page,
+                    response
+                )
+            )
             .expectNext(
                 Pageable(
                     size = size.get().toLong(),
-                    data = userProductReview,
-                    nextPage = null
+                    nextPage = null,
+                    data = listOf(review)
+                        .map {
+                            ReviewResponse(
+                                review = it,
+                                user = allUsers.first { user ->
+                                    user.emailId == review.userId
+                                }
+                            )
+                        }
                 )
             )
             .verifyComplete()

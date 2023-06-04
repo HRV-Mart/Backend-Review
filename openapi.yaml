@@ -114,6 +114,15 @@ paths:
           description: Review not found
 components:
   schemas:
+    ReviewResponse:
+      type: object
+      properties:
+        review:
+          type: object
+          description: Review Object
+        user:
+          type: object
+          description: User Object. For more information, checkout [Backend-User](https://github.com/HRV-Mart/Backend-User)
     Review:
       type: object
       properties:
@@ -153,3 +162,4 @@ components:
           type: array
           items:
             type: object
+            description: Get ReviewResponse object
