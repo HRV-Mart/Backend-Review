@@ -1,8 +1,10 @@
 package com.hrv.mart.backendreview.service
 
 import com.hrv.mart.backendreview.model.Review
+import com.hrv.mart.backendreview.model.ReviewResponse
 import com.hrv.mart.backendreview.repository.ReviewRepository
 import com.hrv.mart.custompageable.Pageable
+import com.hrv.mart.userlibrary.repository.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
@@ -14,7 +16,9 @@ import reactor.core.publisher.Mono
 @Service
 class ReviewService(
     @Autowired
-    private val reviewRepository: ReviewRepository
+    private val reviewRepository: ReviewRepository,
+    @Autowired
+    private val userRepository: UserRepository
 ) {
     fun createReview(
         review: Review,
@@ -62,7 +66,16 @@ class ReviewService(
                 .findByProductId(
                     productId,
                     pageRequest
-                ),
+                )
+                .flatMap { review ->
+                    userRepository.getUserDetails(review.userId)
+                        .map { user ->
+                            ReviewResponse(
+                                user = user,
+                                review = review
+                            )
+                        }
+                },
             count = reviewRepository
                 .countByProductId(productId),
             pageRequest = pageRequest
@@ -77,7 +90,16 @@ class ReviewService(
                 .findByUserId(
                     userId,
                     pageRequest
-                ),
+                )
+                .flatMap { review ->
+                    userRepository.getUserDetails(review.userId)
+                        .map { user ->
+                            ReviewResponse(
+                                user = user,
+                                review = review
+                            )
+                        }
+                },
             count = reviewRepository
                 .countByUserId(userId),
             pageRequest = pageRequest
@@ -91,6 +113,15 @@ class ReviewService(
             userId,
             productId
         )
+            .flatMap { review ->
+                userRepository.getUserDetails(review.userId)
+                    .map { user ->
+                        ReviewResponse(
+                            review = review,
+                            user = user
+                        )
+                    }
+            }
             .map { review ->
                 val count = 1L
                 Pageable(
