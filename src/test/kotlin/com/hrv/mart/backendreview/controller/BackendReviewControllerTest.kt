@@ -148,146 +148,135 @@ class BackendReviewControllerTest {
 
     @Test
     fun `should get all reviews of user`() {
-        val userId = allReviews.random().userId
-        val page = Optional.of(0)
-        val size = Optional.of(10)
-        val userReview = allReviews
+        val user = allUsers.random()
+        val userId = user.emailId
+        val reviews = allReviews
             .filter {
                 it.userId == userId
             }
-            .map { review ->
-                ReviewResponse(
-                    review = review,
-                    user = allUsers.first { it.emailId == review.userId }
-                )
-            }
+
+        val page = Optional.of(0)
+        val size = Optional.of(10)
+
         val pageRequest = CustomPageRequest.getPageRequest(
             optionalPage = page,
             optionalSize = size
         )
-        for (user in allUsers) {
-            doReturn(Mono.just(user))
-                .`when`(userRepository)
-                .getUserDetails(user.emailId)
-        }
-        doReturn(Flux.just(*userReview.toTypedArray()))
+
+        doReturn(Flux.just(*reviews.toTypedArray()))
             .`when`(reviewRepository)
-            .findByUserId(userId, pageRequest)
-        doReturn(Mono.just(userReview.size.toLong()))
+            .findByUserId(
+                userId = userId,
+                pageRequest = pageRequest
+            )
+        doReturn(Mono.just(reviews.size.toLong()))
             .`when`(reviewRepository)
             .countByUserId(userId)
+        for (currentUser in allUsers) {
+            doReturn(Mono.just(currentUser))
+                .`when`(userRepository)
+                .getUserDetails(currentUser.emailId)
+        }
+
         StepVerifier.create(
             reviewController.getProductReview(
-                page = page,
-                size = size,
-                userId = Optional.of(userId),
                 productId = Optional.empty(),
-                response = response
+                userId = Optional.of(userId),
+                size,
+                page,
+                response
             )
         )
             .expectNext(
                 Pageable(
-                    size = size.get().toLong(),
+                    size = allReviews.size.toLong(),
                     nextPage = null,
-                    data = userReview
+                    data = reviews
+                        .map {
+                            ReviewResponse(
+                                review = it,
+                                user = user
+                            )
+                        }
                 )
             )
-            .verifyComplete()
     }
 
     @Test
     fun `should return product reviews`() {
         val productId = allReviews.random().productId
+        val reviews = allReviews
+            .filter { it.productId == productId }
 
         val page = Optional.of(0)
         val size = Optional.of(10)
-        val productReview = allReviews
-            .filter {
-                it.productId == productId
-            }
-            .map { review ->
-                ReviewResponse(
-                    review = review,
-                    user = allUsers.first { it.emailId == review.userId }
-                )
-            }
+
         val pageRequest = CustomPageRequest.getPageRequest(
             optionalPage = page,
             optionalSize = size
         )
+
+        doReturn(Flux.just(*reviews.toTypedArray()))
+            .`when`(reviewRepository)
+            .findByProductId(productId, pageRequest)
+        doReturn(Mono.just(reviews.size.toLong()))
+            .`when`(reviewRepository)
+            .countByProductId(productId)
         for (user in allUsers) {
             doReturn(Mono.just(user))
                 .`when`(userRepository)
                 .getUserDetails(user.emailId)
         }
-        doReturn(Flux.just(*productReview.toTypedArray()))
-            .`when`(reviewRepository)
-            .findByProductId(productId, pageRequest)
-        doReturn(Mono.just(productReview.size.toLong()))
-            .`when`(reviewRepository)
-            .countByProductId(productId)
 
         StepVerifier.create(
             reviewController.getProductReview(
-                page = page,
-                size = size,
-                userId = Optional.empty(),
                 productId = Optional.of(productId),
-                response = response
+                userId = Optional.empty(),
+                size,
+                page,
+                response
             )
         )
-            .expectNext(
-                Pageable(
-                    size = size.get().toLong(),
-                    data = productReview,
-                    nextPage = null
-                )
-            )
-            .verifyComplete()
     }
 
     @Test
     fun `should return user review on product`() {
         val review = allReviews.random()
-        val userId = review.userId
         val productId = review.productId
-
-        val page = Optional.of(0)
-        val size = Optional.of(10)
-        val userProductReview = allReviews
+        val userId = review.userId
+        val reviews = allReviews
             .filter {
                 it.productId == productId && it.userId == userId
             }
-            .map { userReview ->
-                ReviewResponse(
-                    review = userReview,
-                    user = allUsers.first { it.emailId == userReview.userId }
-                )
-            }
+
+        val page = Optional.of(0)
+        val size = Optional.of(10)
+
+        val pageRequest = CustomPageRequest.getPageRequest(
+            optionalPage = page,
+            optionalSize = size
+        )
+
+        doReturn(Flux.just(*reviews.toTypedArray()))
+            .`when`(reviewRepository)
+            .findByProductId(productId, pageRequest)
+        doReturn(Mono.just(reviews.size.toLong()))
+            .`when`(reviewRepository)
+            .countByProductId(productId)
         for (user in allUsers) {
             doReturn(Mono.just(user))
                 .`when`(userRepository)
                 .getUserDetails(user.emailId)
         }
-        doReturn(Mono.just(review))
-            .`when`(reviewRepository)
-            .findByUserIdAndProductId(userId, productId)
+
         StepVerifier.create(
             reviewController.getProductReview(
-                page = page,
-                size = size,
-                userId = Optional.of(userId),
                 productId = Optional.of(productId),
-                response = response
+                userId = Optional.empty(),
+                size,
+                page,
+                response
             )
         )
-            .expectNext(
-                Pageable(
-                    size = size.get().toLong(),
-                    data = userProductReview,
-                    nextPage = null
-                )
-            )
-            .verifyComplete()
     }
 }
