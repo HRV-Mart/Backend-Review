@@ -3,7 +3,7 @@ package com.hrv.mart.backendreview.service
 import com.hrv.mart.backendreview.model.Review
 import com.hrv.mart.backendreview.model.ReviewResponse
 import com.hrv.mart.backendreview.repository.ReviewRepository
-import com.hrv.mart.custompageable.Pageable
+import com.hrv.mart.custompageable.model.Pageable
 import com.hrv.mart.userlibrary.repository.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest

@@ -4,7 +4,7 @@ import com.hrv.mart.backendreview.model.Review
 import com.hrv.mart.backendreview.model.ReviewResponse
 import com.hrv.mart.backendreview.service.ReviewService
 import com.hrv.mart.custompageable.CustomPageRequest
-import com.hrv.mart.custompageable.Pageable
+import com.hrv.mart.custompageable.model.Pageable
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.server.reactive.ServerHttpResponse
