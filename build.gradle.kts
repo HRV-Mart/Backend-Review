@@ -42,7 +42,7 @@ dependencies {
     // detekt plugins
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.0")
     // Custom-Pageable
-    implementation("com.hrv.mart:custom-pageable:0.0.1-SNAPSHOT")
+    implementation("com.hrv.mart:custom-pageable:0.0.2")
     // User-Library
     implementation("com.hrv.mart:user-library:0.0.3")
 }
