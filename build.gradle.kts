@@ -5,7 +5,7 @@ plugins {
     id("org.springframework.boot") version "3.1.1"
     id("io.spring.dependency-management") version "1.1.0"
     kotlin("jvm") version "1.8.22"
-    kotlin("plugin.spring") version "1.8.21"
+    kotlin("plugin.spring") version "1.8.22"
     id("jacoco")// This is to use Jacoco for coverage testing
     id("io.gitlab.arturbosch.detekt") version("1.23.0")
 }
@@ -14,6 +14,14 @@ detekt {
     config.setFrom(file("config/detekt/detekt.yml"))
     buildUponDefaultConfig = true
 }
+configurations.all {
+    resolutionStrategy.eachDependency {
+        if (requested.group == "org.jetbrains.kotlin") {
+            useVersion("1.8.21")
+        }
+    }
+}
+
 group = "com.hrv.mart"
 version = "0.0.1-SNAPSHOT"
 java.sourceCompatibility = JavaVersion.VERSION_17
