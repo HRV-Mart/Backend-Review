@@ -47,13 +47,14 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.projectreactor:reactor-test")
-    // detekt plugins
+    // detekt pluginstasks.create
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.0")
     // HRV-Mart dependency
     implementation("com.hrv.mart:custom-pageable:0.0.2")
     implementation("com.hrv.mart:user-library:0.0.3")
     // Test-Container
     implementation("org.testcontainers:junit-jupiter")
+    testImplementation("org.testcontainers:mongodb")
 }
 
 tasks.withType<KotlinCompile> {
