@@ -23,6 +23,7 @@ class BackendReviewControllerTests(
     @Autowired
     private val reviewRepository: ReviewRepository
 ) {
+
     @BeforeEach
     fun setUp() {
         RestAssured.basePath = "http://localhost:$port"
@@ -41,9 +42,10 @@ class BackendReviewControllerTests(
         @JvmStatic
         @BeforeAll
         fun beforeAll() {
-            mongoDb.addExposedPort(27017)
+            mongoDb.addExposedPort(27_017)
             mongoDb.start()
         }
+
         @JvmStatic
         @AfterAll
         fun afterAll() =
