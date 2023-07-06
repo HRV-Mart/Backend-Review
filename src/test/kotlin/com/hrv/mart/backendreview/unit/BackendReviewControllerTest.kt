@@ -1,6 +1,8 @@
 package com.hrv.mart.backendreview.unit
 
 import com.hrv.mart.backendreview.controller.ReviewController
+import com.hrv.mart.backendreview.fixture.ReviewFixture.allReviews
+import com.hrv.mart.backendreview.fixture.ReviewFixture.allUsers
 import com.hrv.mart.backendreview.fixture.ReviewFixture.description
 import com.hrv.mart.backendreview.fixture.ReviewFixture.images
 import com.hrv.mart.backendreview.fixture.ReviewFixture.productId1
@@ -31,47 +33,6 @@ class BackendReviewControllerTest {
     private val userRepository = mock(UserRepository::class.java)
     private val reviewService = ReviewService(reviewRepository, userRepository)
     private val reviewController = ReviewController(reviewService)
-
-    private val allReviews = listOf(
-        Review(
-            productId = productId1,
-            userId = userId1,
-            images = images,
-            description = description,
-            title = title
-        ),
-        Review(
-            productId = productId1,
-            userId = userId2,
-            images = images,
-            description = description,
-            title = title
-        ),
-        Review(
-            productId = productId2,
-            userId = userId1,
-            images = images,
-            description = description,
-            title = title
-        ),
-        Review(
-            productId = productId2,
-            userId = userId2,
-            images = images,
-            description = description,
-            title = title
-        )
-    )
-    private val allUsers = listOf(
-        User(
-            name = "Test User",
-            emailId = userId1
-        ),
-        User(
-            name = "Test User",
-            emailId = userId2
-        )
-    )
 
     @Test
     fun `should create product and return a successful message`() {
