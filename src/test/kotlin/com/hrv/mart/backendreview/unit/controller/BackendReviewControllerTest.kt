@@ -1,12 +1,13 @@
-package com.hrv.mart.backendreview.controller
+package com.hrv.mart.backendreview.unit.controller
 
-import com.hrv.mart.backendreview.fixture.ReviewFixture.description
-import com.hrv.mart.backendreview.fixture.ReviewFixture.images
-import com.hrv.mart.backendreview.fixture.ReviewFixture.productId1
-import com.hrv.mart.backendreview.fixture.ReviewFixture.productId2
-import com.hrv.mart.backendreview.fixture.ReviewFixture.title
-import com.hrv.mart.backendreview.fixture.ReviewFixture.userId1
-import com.hrv.mart.backendreview.fixture.ReviewFixture.userId2
+import com.hrv.mart.backendreview.controller.ReviewController
+import com.hrv.mart.backendreview.unit.fixture.ReviewFixture.description
+import com.hrv.mart.backendreview.unit.fixture.ReviewFixture.images
+import com.hrv.mart.backendreview.unit.fixture.ReviewFixture.productId1
+import com.hrv.mart.backendreview.unit.fixture.ReviewFixture.productId2
+import com.hrv.mart.backendreview.unit.fixture.ReviewFixture.title
+import com.hrv.mart.backendreview.unit.fixture.ReviewFixture.userId1
+import com.hrv.mart.backendreview.unit.fixture.ReviewFixture.userId2
 import com.hrv.mart.backendreview.model.Review
 import com.hrv.mart.backendreview.model.ReviewResponse
 import com.hrv.mart.backendreview.repository.ReviewRepository

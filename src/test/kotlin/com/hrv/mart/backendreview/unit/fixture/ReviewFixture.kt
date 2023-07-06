@@ -1,4 +1,4 @@
-package com.hrv.mart.backendreview.fixture
+package com.hrv.mart.backendreview.unit.fixture
 
 object ReviewFixture {
     const val productId1 = "productId1"
