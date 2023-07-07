@@ -6,7 +6,6 @@ import com.hrv.mart.backendreview.fixture.ReviewFixture.allUsers
 import com.hrv.mart.backendreview.model.ReviewResponse
 import com.hrv.mart.backendreview.repository.ReviewRepository
 import com.hrv.mart.backendreview.service.ReviewService
-import com.hrv.mart.custompageable.CustomPageRequest
 import com.hrv.mart.custompageable.model.Pageable
 import com.hrv.mart.userlibrary.repository.UserRepository
 import org.junit.jupiter.api.AfterAll
@@ -19,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest
 import org.springframework.http.server.reactive.ServerHttpResponse
 import org.testcontainers.containers.MongoDBContainer
-import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
 import java.util.*
@@ -161,11 +159,6 @@ class BackendReviewControllerTest(
         val page = Optional.of(0)
         val size = Optional.of(10)
 
-        val pageRequest = CustomPageRequest.getPageRequest(
-            optionalPage = page,
-            optionalSize = size
-        )
-
         for (user in allUsers) {
             doReturn(Mono.just(user))
                 .`when`(userRepository)
@@ -246,7 +239,8 @@ class BackendReviewControllerTest(
             .verifyComplete()
     }
     companion object {
-        private lateinit var  mongoDBContainer: MongoDBContainer
+        private lateinit var mongoDBContainer: MongoDBContainer
+
         @JvmStatic
         @BeforeAll
         fun beforeAll() {
@@ -266,5 +260,4 @@ class BackendReviewControllerTest(
             mongoDBContainer.stop()
         }
     }
-
 }
