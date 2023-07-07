@@ -1,4 +1,4 @@
-package com.hrv.mart.backendreview.unit
+package com.hrv.mart.backendreview
 
 import com.hrv.mart.backendreview.controller.ReviewController
 import com.hrv.mart.backendreview.fixture.ReviewFixture.allReviews
