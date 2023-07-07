@@ -53,10 +53,8 @@ dependencies {
     implementation("com.hrv.mart:custom-pageable:0.0.2")
     implementation("com.hrv.mart:user-library:0.0.3")
     // Test-Container
-    testImplementation("org.testcontainers:junit-jupiter")
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.testcontainers:mongodb")
-    // https://mvnrepository.com/artifact/io.rest-assured/rest-assured
-    testImplementation("io.rest-assured:rest-assured:5.3.1")
 
 }
 
