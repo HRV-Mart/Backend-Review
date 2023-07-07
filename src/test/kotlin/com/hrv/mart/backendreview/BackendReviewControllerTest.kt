@@ -1,86 +1,47 @@
-package com.hrv.mart.backendreview.controller
+package com.hrv.mart.backendreview
 
-import com.hrv.mart.backendreview.fixture.ReviewFixture.description
-import com.hrv.mart.backendreview.fixture.ReviewFixture.images
-import com.hrv.mart.backendreview.fixture.ReviewFixture.productId1
-import com.hrv.mart.backendreview.fixture.ReviewFixture.productId2
-import com.hrv.mart.backendreview.fixture.ReviewFixture.title
-import com.hrv.mart.backendreview.fixture.ReviewFixture.userId1
-import com.hrv.mart.backendreview.fixture.ReviewFixture.userId2
-import com.hrv.mart.backendreview.model.Review
+import com.hrv.mart.backendreview.controller.ReviewController
+import com.hrv.mart.backendreview.fixture.ReviewFixture.allReviews
+import com.hrv.mart.backendreview.fixture.ReviewFixture.allUsers
 import com.hrv.mart.backendreview.model.ReviewResponse
 import com.hrv.mart.backendreview.repository.ReviewRepository
 import com.hrv.mart.backendreview.service.ReviewService
-import com.hrv.mart.custompageable.CustomPageRequest
 import com.hrv.mart.custompageable.model.Pageable
-import com.hrv.mart.userlibrary.model.User
 import com.hrv.mart.userlibrary.repository.UserRepository
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.mock
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest
 import org.springframework.http.server.reactive.ServerHttpResponse
-import reactor.core.publisher.Flux
+import org.testcontainers.containers.MongoDBContainer
 import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
 import java.util.*
 
-class BackendReviewControllerTest {
+@DataMongoTest
+class BackendReviewControllerTest(
+    @Autowired
+    private val reviewRepository: ReviewRepository
+) {
     private val response = mock(ServerHttpResponse::class.java)
-    private val reviewRepository = mock(ReviewRepository::class.java)
     private val userRepository = mock(UserRepository::class.java)
     private val reviewService = ReviewService(reviewRepository, userRepository)
     private val reviewController = ReviewController(reviewService)
 
-    private val allReviews = listOf(
-        Review(
-            productId = productId1,
-            userId = userId1,
-            images = images,
-            description = description,
-            title = title
-        ),
-        Review(
-            productId = productId1,
-            userId = userId2,
-            images = images,
-            description = description,
-            title = title
-        ),
-        Review(
-            productId = productId2,
-            userId = userId1,
-            images = images,
-            description = description,
-            title = title
-        ),
-        Review(
-            productId = productId2,
-            userId = userId2,
-            images = images,
-            description = description,
-            title = title
-        )
-    )
-    private val allUsers = listOf(
-        User(
-            name = "Test User",
-            emailId = userId1
-        ),
-        User(
-            name = "Test User",
-            emailId = userId2
-        )
-    )
+    @BeforeEach
+    fun cleanDataBase() {
+        reviewRepository
+            .deleteAll()
+            .subscribe()
+    }
 
     @Test
     fun `should create product and return a successful message`() {
         val review = allReviews.random()
-        doReturn(Mono.just(review))
-            .`when`(reviewRepository)
-            .insert(review)
-        doReturn(Mono.just(false))
-            .`when`(reviewRepository)
-            .existsByUserIdAndProductId(review.userId, review.productId)
         StepVerifier.create(
             reviewController
                 .createReview(
@@ -95,9 +56,9 @@ class BackendReviewControllerTest {
     @Test
     fun `should not add review in database if it already exist`() {
         val review = allReviews.random()
-        doReturn(Mono.just(true))
-            .`when`(reviewRepository)
-            .existsByUserIdAndProductId(review.userId, review.productId)
+        reviewRepository
+            .insert(review)
+            .subscribe()
         StepVerifier.create(
             reviewController
                 .createReview(
@@ -112,12 +73,9 @@ class BackendReviewControllerTest {
     @Test
     fun `should delete review from database if it exist`() {
         val review = allReviews.random()
-        doReturn(Mono.just(true))
-            .`when`(reviewRepository)
-            .existsByUserIdAndProductId(review.userId, review.productId)
-        doReturn(Mono.empty<Void>())
-            .`when`(reviewRepository)
-            .deleteByUserIdAndProductId(review.userId, review.productId)
+        reviewRepository
+            .insert(review)
+            .subscribe()
         StepVerifier.create(
             reviewController.deleteReview(
                 review.userId,
@@ -132,9 +90,6 @@ class BackendReviewControllerTest {
     @Test
     fun `should not delete review from database if it does not  exist`() {
         val review = allReviews.random()
-        doReturn(Mono.just(false))
-            .`when`(reviewRepository)
-            .existsByUserIdAndProductId(review.userId, review.productId)
         StepVerifier.create(
             reviewController.deleteReview(
                 review.userId,
@@ -154,24 +109,13 @@ class BackendReviewControllerTest {
             .filter {
                 it.userId == userId
             }
+        reviewRepository
+            .insert(reviews)
+            .subscribe()
 
         val page = Optional.of(0)
         val size = Optional.of(10)
 
-        val pageRequest = CustomPageRequest.getPageRequest(
-            optionalPage = page,
-            optionalSize = size
-        )
-
-        doReturn(Flux.just(*reviews.toTypedArray()))
-            .`when`(reviewRepository)
-            .findByUserId(
-                userId = userId,
-                pageRequest = pageRequest
-            )
-        doReturn(Mono.just(reviews.size.toLong()))
-            .`when`(reviewRepository)
-            .countByUserId(userId)
         for (currentUser in allUsers) {
             doReturn(Mono.just(currentUser))
                 .`when`(userRepository)
@@ -208,21 +152,13 @@ class BackendReviewControllerTest {
         val productId = allReviews.random().productId
         val reviews = allReviews
             .filter { it.productId == productId }
+        reviewRepository
+            .insert(reviews)
+            .subscribe()
 
         val page = Optional.of(0)
         val size = Optional.of(10)
 
-        val pageRequest = CustomPageRequest.getPageRequest(
-            optionalPage = page,
-            optionalSize = size
-        )
-
-        doReturn(Flux.just(*reviews.toTypedArray()))
-            .`when`(reviewRepository)
-            .findByProductId(productId, pageRequest)
-        doReturn(Mono.just(reviews.size.toLong()))
-            .`when`(reviewRepository)
-            .countByProductId(productId)
         for (user in allUsers) {
             doReturn(Mono.just(user))
                 .`when`(userRepository)
@@ -266,12 +202,9 @@ class BackendReviewControllerTest {
         val page = Optional.of(0)
         val size = Optional.of(10)
 
-        doReturn(Mono.just(review))
-            .`when`(reviewRepository)
-            .findByUserIdAndProductId(
-                userId,
-                productId
-            )
+        reviewRepository
+            .insert(review)
+            .subscribe()
         for (user in allUsers) {
             doReturn(Mono.just(user))
                 .`when`(userRepository)
@@ -304,5 +237,27 @@ class BackendReviewControllerTest {
                 )
             )
             .verifyComplete()
+    }
+    companion object {
+        private lateinit var mongoDBContainer: MongoDBContainer
+
+        @JvmStatic
+        @BeforeAll
+        fun beforeAll() {
+            mongoDBContainer = MongoDBContainer("mongo:latest")
+                .apply { withExposedPorts(27_017) }
+                .apply { start() }
+            mongoDBContainer
+                .withReuse(true)
+                .withAccessToHost(true)
+            System.setProperty("spring.data.mongodb.uri", "${mongoDBContainer.connectionString}/test")
+            System.setProperty("spring.data.mongodb.auto-index-creation", "true")
+        }
+
+        @JvmStatic
+        @AfterAll
+        fun afterAll() {
+            mongoDBContainer.stop()
+        }
     }
 }
