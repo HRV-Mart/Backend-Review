@@ -7,6 +7,7 @@ import com.hrv.mart.custompageable.model.Pageable
 import com.hrv.mart.userlibrary.repository.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.http.HttpStatus
 import org.springframework.http.server.reactive.ServerHttpResponse
 import org.springframework.stereotype.Service
@@ -65,7 +66,7 @@ class ReviewService(
             data = reviewRepository
                 .findByProductId(
                     productId,
-                    pageRequest
+                    addSortingInPageRequest(pageRequest)
                 )
                 .flatMap { review ->
                     userRepository.getUserDetails(review.userId)
@@ -89,7 +90,7 @@ class ReviewService(
             data = reviewRepository
                 .findByUserId(
                     userId,
-                    pageRequest
+                    addSortingInPageRequest(pageRequest)
                 )
                 .flatMap { review ->
                     userRepository.getUserDetails(review.userId)
@@ -150,4 +151,12 @@ class ReviewService(
                         )
                     }
             }
+    private fun addSortingInPageRequest(pageRequest: PageRequest) =
+        pageRequest
+            .withSort(
+                Sort.by(
+                    Sort.Direction.DESC,
+                    "dateTimeOfReview"
+                )
+            )
 }
