@@ -24,7 +24,7 @@ object ReviewFixture {
             userId = USER_ID_1,
             images = images,
             description = DESCRIPTION,
-            title = TITLE+"1",
+            title = TITLE + "1",
             dateTimeOfReview = "07/08/2023 06:26:12"
         ),
         Review(
@@ -32,7 +32,7 @@ object ReviewFixture {
             userId = USER_ID_2,
             images = images,
             description = DESCRIPTION,
-            title = TITLE+"2",
+            title = TITLE + "2",
             dateTimeOfReview = "07/08/2023 06:27:20"
         ),
         Review(
@@ -40,7 +40,7 @@ object ReviewFixture {
             userId = USER_ID_1,
             images = images,
             description = DESCRIPTION,
-            title = TITLE+"4",
+            title = TITLE + "3",
             dateTimeOfReview = "07/08/2023 06:28:35"
         ),
         Review(
@@ -48,7 +48,7 @@ object ReviewFixture {
             userId = USER_ID_2,
             images = images,
             description = DESCRIPTION,
-            title = TITLE+"4",
+            title = TITLE + "4",
             dateTimeOfReview = "07/08/2023 06:29:05"
         )
     )

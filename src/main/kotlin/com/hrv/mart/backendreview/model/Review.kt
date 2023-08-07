@@ -20,7 +20,7 @@ data class Review(
     var dateTimeOfReview: String? = SimpleDateFormat("dd/MM/YYYY hh:mm:ss")
         .format(Date())
 ) {
-    fun resetDateTime(): Review{
+    fun resetDateTime(): Review {
         this.dateTimeOfReview = SimpleDateFormat("dd/MM/YYYY hh:mm:ss")
             .format(Date())
         return this
@@ -49,5 +49,4 @@ data class Review(
         result = 31 * result + images.hashCode()
         return result
     }
-
 }
