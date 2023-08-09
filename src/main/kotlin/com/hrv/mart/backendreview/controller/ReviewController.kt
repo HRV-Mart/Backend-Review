@@ -31,7 +31,7 @@ class ReviewController(
         response: ServerHttpResponse
     ) =
         reviewService.createReview(
-            review,
+            review.resetDateTime(),
             response
         )
 

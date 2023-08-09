@@ -36,7 +36,7 @@ class BackendReviewControllerTest(
     fun cleanDataBase() {
         reviewRepository
             .deleteAll()
-            .subscribe()
+            .block()
     }
 
     @Test
@@ -58,7 +58,7 @@ class BackendReviewControllerTest(
         val review = allReviews.random()
         reviewRepository
             .insert(review)
-            .subscribe()
+            .block()
         StepVerifier.create(
             reviewController
                 .createReview(
@@ -75,7 +75,7 @@ class BackendReviewControllerTest(
         val review = allReviews.random()
         reviewRepository
             .insert(review)
-            .subscribe()
+            .block()
         StepVerifier.create(
             reviewController.deleteReview(
                 review.userId,
@@ -111,8 +111,8 @@ class BackendReviewControllerTest(
             }
         reviewRepository
             .insert(reviews)
-            .subscribe()
-
+            .collectList()
+            .block()
         val page = Optional.of(0)
         val size = Optional.of(10)
 
@@ -121,7 +121,6 @@ class BackendReviewControllerTest(
                 .`when`(userRepository)
                 .getUserDetails(currentUser.emailId)
         }
-
         StepVerifier.create(
             reviewController.getProductReview(
                 productId = Optional.empty(),
@@ -154,7 +153,8 @@ class BackendReviewControllerTest(
             .filter { it.productId == productId }
         reviewRepository
             .insert(reviews)
-            .subscribe()
+            .collectList()
+            .block()
 
         val page = Optional.of(0)
         val size = Optional.of(10)
@@ -204,7 +204,7 @@ class BackendReviewControllerTest(
 
         reviewRepository
             .insert(review)
-            .subscribe()
+            .block()
         for (user in allUsers) {
             doReturn(Mono.just(user))
                 .`when`(userRepository)

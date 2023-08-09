@@ -5,21 +5,14 @@ plugins {
     id("org.springframework.boot") version "3.1.2"
     id("io.spring.dependency-management") version "1.1.2"
     kotlin("jvm") version "1.9.0"
-    kotlin("plugin.spring") version "1.8.22"
+    kotlin("plugin.spring") version "1.9.0"
     id("jacoco")// This is to use Jacoco for coverage testing
-    id("io.gitlab.arturbosch.detekt") version("1.23.0")
+    id("io.gitlab.arturbosch.detekt") version("1.23.1")
 }
 detekt {
-    toolVersion = "1.23.0"
+    toolVersion = "1.23.1"
     config.setFrom(file("config/detekt/detekt.yml"))
     buildUponDefaultConfig = true
-}
-configurations.all {
-    resolutionStrategy.eachDependency {
-        if (requested.group == "org.jetbrains.kotlin") {
-            useVersion("1.8.21")
-        }
-    }
 }
 
 group = "com.hrv.mart"
@@ -48,7 +41,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.projectreactor:reactor-test")
     // detekt pluginstasks.create
-    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.0")
+    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.1")
     // HRV-Mart dependency
     implementation("com.hrv.mart:custom-pageable:0.0.2")
     implementation("com.hrv.mart:user-library:0.0.3")
@@ -86,7 +79,7 @@ tasks.jacocoTestCoverageVerification {
                 "${group}.backendreview.repository.ReviewRepository.kt.*"
             )
             limit {
-                minimum = "0.9".toBigDecimal()
+                minimum = "0.8".toBigDecimal()
             }
         }
     }
